@@ -7,8 +7,8 @@
 
 /// 키워드 관리자를 정의합니다.
 protocol KeywordControllable {
-    /// 저장소 관리자입니다.
-    var persistentController: any Persistable { get }
+    /// 현재 키워드 정보입니다.
+    var currentKeywords: [any KeywordProtocol] { get async }
     
     /// 키워드를 추가합니다. 중복은 허용하지 않습니다.
     /// - Parameter value: 키워드 값.

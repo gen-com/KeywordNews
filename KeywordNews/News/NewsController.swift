@@ -9,11 +9,12 @@ import CoreData
 
 /// 뉴스 관리자의 구현체입니다.
 actor NewsController: NewsControllable {
-    var persistentController: Persistable
-    var keywordNewsDictionary: [KeywordWrapper: NewsInformationProtocol]
+    private var persistentController: Persistable
     private let backgroundContext: NSManagedObjectContext
     private var standardDateForOrder: Date
     private var storedKeywordSet: Set<KeywordWrapper>
+    
+    var keywordNewsDictionary: [KeywordWrapper: NewsInformationProtocol]
     
     // MARK: - Initializer
     
@@ -205,7 +206,7 @@ actor NewsController: NewsControllable {
     ) async throws {
         let standardDateForOrder = standardDateForOrder
         try await backgroundContext.perform { [weak self] in
-            guard let weakSelf = self else { throw CustomError.valueNotFound }
+            guard let weakSelf = self else { throw CommonError.valueNotFound }
             var index = 0
             let newsInsertRequest = NSBatchInsertRequest(entityName: News.entityName, managedObjectHandler: { object in
                 if index < newsList.count {

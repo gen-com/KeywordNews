@@ -9,8 +9,8 @@ import CoreData
 
 /// 키워드를 관리하는 구현체입니다.
 struct KeywordController: KeywordControllable {
+    private var persistentController: Persistable
     private let backgroundContext: NSManagedObjectContext
-    var persistentController: Persistable
     
     // MARK: - Initializer
     
@@ -20,6 +20,14 @@ struct KeywordController: KeywordControllable {
     }
     
     // MARK: - KeywordControllable conformance
+    
+    var currentKeywords: [any KeywordProtocol] {
+        get async {
+            await backgroundContext.perform {
+                (try? Keyword.fetchRequest().execute()) ?? []
+            }
+        }
+    }
     
     func add(_ keyword: some KeywordProtocol) async throws {
         try await backgroundContext.perform {

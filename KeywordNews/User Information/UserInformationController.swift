@@ -9,7 +9,7 @@ import CoreData
 
 /// 사용자 정보를 관리하는 구현체입니다.
 struct UserInformationController: UserInformationControllable {
-    var persistentController: Persistable
+    private var persistentController: Persistable
     private let backgroundContext: NSManagedObjectContext
     
     // MARK: - Initializer
@@ -21,23 +21,28 @@ struct UserInformationController: UserInformationControllable {
     
     // MARK: - UserInformationControllable conformance
     
-    func setNewsExpirationDays(_ days: Int) async throws {
-        try await backgroundContext.perform {
-            guard let userInformation = try? loadCurrentUserInformation()
-            else { throw Error.failedToFetch }
-            userInformation.newsExpirationDays = days
-            do { try backgroundContext.save() }
-            catch { throw Error.failedToSet }
+    var currentUserInformation: any UserInformationProtocol {
+        get async throws {
+            try await backgroundContext.perform {
+                guard let userInformation = try? UserInformation.fetchRequest().execute().first
+                else { throw Error.failedToFetch }
+                return userInformation
+            }
         }
     }
     
-    /// 현재의 사용자 정보를 불러옵니다.
-    /// - Returns: 현재 사용자 정보.
-    private func loadCurrentUserInformation() throws -> UserInformation {
-        if let existingUserInformation = try? UserInformation.fetchRequest().execute().first {
-            return existingUserInformation
-        } else {
-            return try UserInformation(using: backgroundContext)
+    func setNewsExpirationDays(_ days: Int) async throws {
+        try await backgroundContext.perform {
+            if let userInformation = try? UserInformation.fetchRequest().execute().first {
+                userInformation.newsExpirationDays = days
+            } else {
+                do {
+                    let userInformation = try UserInformation(using: backgroundContext)
+                    userInformation.newsExpirationDays = days
+                } catch { throw Error.failedToCreate }
+            }
+            do { try backgroundContext.save() }
+            catch { throw Error.failedToSet }
         }
     }
     
@@ -47,6 +52,8 @@ struct UserInformationController: UserInformationControllable {
     enum Error: PresentableError {
         /// 사용자 정보를 불러오지 못한 경우.
         case failedToFetch
+        /// 키워드 정보를 생성하지 못한 경우.
+        case failedToCreate
         /// 사용자 정보를 설정하지 못한 경우.
         case failedToSet
         
@@ -58,6 +65,8 @@ struct UserInformationController: UserInformationControllable {
             switch self {
             case .failedToFetch:
                 return "사용자 정보를 불러오는데 실패했습니다."
+            case .failedToCreate:
+                return "사용자 정보 생성에 실패했습니다."
             case .failedToSet:
                 return "사용자 정보를 설정하는데 실패했습니다."
             }

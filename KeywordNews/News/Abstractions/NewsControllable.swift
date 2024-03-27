@@ -9,8 +9,6 @@ import Foundation
 
 /// 뉴스 관리자를 정의합니다.
 protocol NewsControllable: Actor {
-    /// 저장소 관리자입니다.
-    var persistentController: Persistable { get }
     /// 키워드별 뉴스 정보에 매핑되는 딕셔너리입니다.
     var keywordNewsDictionary: [KeywordWrapper: any NewsInformationProtocol] { get }
     
