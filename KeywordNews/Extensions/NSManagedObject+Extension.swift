@@ -10,7 +10,7 @@ import CoreData
 public extension NSManagedObject {
     convenience init(using context: NSManagedObjectContext) throws {
         guard let entity = NSEntityDescription.entity(forEntityName: "\(type(of: self).self)", in: context)
-        else { throw CustomError.valueNotFound }
+        else { throw CommonError.valueNotFound }
         self.init(entity: entity, insertInto: context)
     }
 }

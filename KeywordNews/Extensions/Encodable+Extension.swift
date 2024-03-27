@@ -14,7 +14,7 @@ extension Encodable {
         let data = try self.encodeJSON()
         guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
               let dictionary = jsonObject as? [String: Any]
-        else { throw CustomError.invalidConversion }
+        else { throw CommonError.invalidConversion }
         return dictionary
     }
     
@@ -31,6 +31,6 @@ extension Encodable {
     /// - Returns: JSON 데이터.
     func encodeJSON() throws -> Data {
         do { return try JSONEncoder().encode(self) }
-        catch { throw CustomError.failToEncode }
+        catch { throw CommonError.failToEncode }
     }
 }

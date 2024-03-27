@@ -53,9 +53,13 @@ enum NaverSearcher: NaverSearchable {
     
     /// 네이버 검색에서 발생할 수 있는 오류를 정의합니다.
     enum Error: PresentableError {
+        /// 잘못된 URL.
         case badURL
+        /// 잘못된 응답.
         case badResponse
+        /// 클라이언트 상의 네트워크 오류.
         case clientNetworkError
+        /// 서버 오류.
         case serverError(String)
         
         var title: String {

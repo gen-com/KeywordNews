@@ -10,10 +10,12 @@ import CoreData
 
 /// 코어 데이터 기반의 사용자 정보 구현입니다.
 final class UserInformation: NSManagedObject, UserInformationProtocol {
-    
-    // MARK: - Attributes
-    
     @NSManaged var newsExpirationDays: Int
+    
+    // MARK: - Type Property
+    
+    /// 엔티티 이름.
+    static let entityName = "\(UserInformation.self)"
     
     // MARK: - Fetch request
     

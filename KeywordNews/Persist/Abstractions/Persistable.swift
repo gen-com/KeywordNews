@@ -9,5 +9,6 @@ import CoreData
 
 /// 디스크에 저장가능한 유형을 정의합니다.
 protocol Persistable {
+    /// 저장소.
     var container: NSPersistentContainer { get }
 }

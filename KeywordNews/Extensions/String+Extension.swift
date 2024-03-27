@@ -16,7 +16,7 @@ extension String {
         dateFormatter.locale = format.locale
         dateFormatter.dateFormat = format.rawValue
         guard let date = dateFormatter.date(from: self)
-        else { throw CustomError.invalidConversion }
+        else { throw CommonError.invalidConversion }
         return date
     }
 }

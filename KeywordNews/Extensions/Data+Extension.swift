@@ -13,6 +13,6 @@ extension Data {
     /// - Returns: 변환된 값.
     func decodeJSON<Output: Decodable>(_ output: Output.Type) throws -> Output {
         do { return try JSONDecoder().decode(output, from: self) }
-        catch { throw CustomError.failToDecode }
+        catch { throw CommonError.failToDecode }
     }
 }
