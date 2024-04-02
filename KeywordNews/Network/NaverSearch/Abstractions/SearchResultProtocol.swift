@@ -15,9 +15,9 @@ protocol SearchResultProtocol<Item>: Codable {
     /// 요청 시각.
     var requestDate: String { get }
     /// 총 검색 결과량.
-    var totalResult: Int { get }
+    var totalItemAmount: Int { get }
     /// 받아온 결과값 시작 지점.
-    var itemStartIndex: Int { get }
+    var startIndex: Int { get }
     /// 받아온 결과값 표시량.
     var itemAmount: Int { get }
     /// 요청한 항목.

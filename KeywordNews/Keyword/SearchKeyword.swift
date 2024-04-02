@@ -7,13 +7,15 @@
 
 /// 검색할 키워드 구현체입니다.
 struct SearchKeyword: KeywordProtocol {
-    var value: String
+    let value: String
     var order: Int
+    let isSaved: Bool
     
     // MARK: - Initializer
     
-    init(value: String, order: Int) {
+    init(value: String) {
         self.value = value
-        self.order = order
+        order = 0
+        isSaved = false
     }
 }

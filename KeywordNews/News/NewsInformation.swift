@@ -9,51 +9,65 @@ import Foundation
 
 /// 뉴스 정보 구현체입니다.
 struct NewsInformation: NewsInformationProtocol {
-    let keyword: any KeywordProtocol
+    var keyword: any KeywordProtocol
     var isFetching: Bool
     var isSearchAvailable: Bool
     var didFetchAll: Bool
-    var lastSavedNewsDate: Date?
     var nextNewsSearchPosition: Int
     var newsList: [any NewsProtocol]
+    private var newsLinkSet: Set<String>
     
     // MARK: - initializer
     
-    init(
-        keyword: some KeywordProtocol,
-        isFetching: Bool = false,
-        isSearchAvailable: Bool = true,
-        didFetchAll: Bool = false,
-        lastSavedNewsDate: Date? = nil,
-        nextNewsSearchPosition: Int = 1,
-        newsList: [any NewsProtocol] = []
-    ) {
+    init(keyword: any KeywordProtocol) {
         self.keyword = keyword
-        self.isFetching = isFetching
-        self.isSearchAvailable = isSearchAvailable
-        self.didFetchAll = didFetchAll
-        self.lastSavedNewsDate = lastSavedNewsDate
-        self.nextNewsSearchPosition = nextNewsSearchPosition
-        self.newsList = newsList
+        isFetching = false
+        isSearchAvailable = true
+        didFetchAll = false
+        nextNewsSearchPosition = 1
+        newsList = []
+        newsLinkSet = []
     }
     
     // MARK: - NewsInformationProtocol conformance
     
-    mutating func append(listOfNews: [any NewsProtocol]) -> Int {
-        var newsLinkSet = Set(newsList.map { $0.link })
-        var duplicateCount = 0
-        for news in listOfNews {
-            if newsLinkSet.contains(news.link) {
-                duplicateCount += 1
-            } else {
-                newsLinkSet.insert(news.link)
-                newsList.append(news)
-            }
+    mutating func updateKeyword(to keyword: any KeywordProtocol) {
+        self.keyword = keyword
+    }
+    
+    mutating func setFetchingState(as value: Bool) {
+        isFetching = value
+    }
+    
+    mutating func update(basedOn newsFetchResult: NewsFetchResultProtocol) {
+        insert(listOfNews: newsFetchResult.newsList)
+        isSearchAvailable = newsList.count < newsFetchResult.searchLimit && !newsFetchResult.doesOverlapSavedNews
+        nextNewsSearchPosition = newsFetchResult.searchPosition + newsFetchResult.newsList.count
+        didFetchAll = keyword.isSaved
+        ? newsFetchResult.newsList.isEmpty : newsFetchResult.searchLimit <= nextNewsSearchPosition
+    }
+    
+    mutating func refresh() {
+        nextNewsSearchPosition = 1
+        isSearchAvailable = true
+        didFetchAll = false
+        removeAllNews()
+    }
+    
+    mutating func insert(listOfNews newsList: [any NewsProtocol]) {
+        for news in newsList where !newsLinkSet.contains(news.link) {
+            newsLinkSet.insert(news.link)
+            self.newsList.append(news)
         }
-        return duplicateCount
     }
     
     mutating func removeAllNews() {
         newsList.removeAll()
+    }
+    
+    mutating func changeArchiveState(of news: any NewsProtocol) throws {
+        guard let targetIndex = newsList.firstIndex(where: { $0.link == news.link })
+        else { throw CommonError.valueNotFound }
+        newsList[targetIndex].isArchived.toggle()
     }
 }

@@ -24,12 +24,12 @@ struct KeywordController: KeywordControllable {
     var currentKeywords: [any KeywordProtocol] {
         get async {
             await backgroundContext.perform {
-                (try? Keyword.fetchRequest().execute()) ?? []
+                (try? Keyword.fetchRequest().execute().map { FetchedKeyword($0) }) ?? []
             }
         }
     }
     
-    func add(_ keyword: some KeywordProtocol) async throws {
+    func add(_ keyword: any KeywordProtocol) async throws {
         try await backgroundContext.perform {
             guard let order = try? backgroundContext.count(for: Keyword.fetchRequest())
             else { throw Error.failedToFetch }
@@ -42,7 +42,7 @@ struct KeywordController: KeywordControllable {
         }
     }
     
-    func remove(_ keyword: some KeywordProtocol) async throws {
+    func remove(_ keyword: any KeywordProtocol) async throws {
         try await backgroundContext.perform {
             guard let storedKeywords = try? Keyword.fetchRequest(from: keyword.order).execute()
             else { throw Error.failedToFetch }

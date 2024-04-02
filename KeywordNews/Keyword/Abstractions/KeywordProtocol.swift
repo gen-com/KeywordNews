@@ -11,4 +11,6 @@ protocol KeywordProtocol: Hashable {
     var value: String { get }
     /// 순서 값.
     var order: Int { get }
+    /// 저장된 여부.
+    var isSaved: Bool { get }
 }

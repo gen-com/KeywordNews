@@ -26,7 +26,7 @@ struct UserInformationController: UserInformationControllable {
             try await backgroundContext.perform {
                 guard let userInformation = try? UserInformation.fetchRequest().execute().first
                 else { throw Error.failedToFetch }
-                return userInformation
+                return FetchedUserInformation(userInformation)
             }
         }
     }

@@ -32,9 +32,9 @@ enum NaverSearcher: NaverSearchable {
         /// 요청 시각.
         var requestDate: String
         /// 총 검색 결과량.
-        let totalResult: Int
+        let totalItemAmount: Int
         /// 받아온 결과값 시작 지점.
-        let itemStartIndex: Int
+        let startIndex: Int
         /// 받아온 결과값 표시량.
         let itemAmount: Int
         /// 요청한 항목.
@@ -42,8 +42,8 @@ enum NaverSearcher: NaverSearchable {
         
         enum CodingKeys: String, CodingKey {
             case requestDate = "lastBuildDate"
-            case totalResult = "total"
-            case itemStartIndex = "start"
+            case totalItemAmount = "total"
+            case startIndex = "start"
             case itemAmount = "display"
             case items
         }

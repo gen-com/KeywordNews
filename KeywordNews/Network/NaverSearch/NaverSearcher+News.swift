@@ -47,9 +47,11 @@ extension NaverSearcher {
         /// 출간 날짜.
         let pubDate: String
         
-        var keywordValue: String { "" }
         var order: Date { Date() }
-        var isArchived: Bool { false }
+        var isArchived: Bool { 
+            get { false }
+            set {}
+        }
         
         enum CodingKeys: String, CodingKey {
             case title

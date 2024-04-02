@@ -24,12 +24,6 @@ final class News: NSManagedObject, NewsProtocol {
     
     // MARK: - Fetch request
     
-    /// 모든 뉴스에 대한 가져오기 요청을 생성합니다.
-    /// - Returns: 뉴스 요청.
-    @nonobjc class func fetchRequest() -> NSFetchRequest<News> {
-        NSFetchRequest<News>(entityName: News.entityName)
-    }
-    
     /// 특정 키워드에 대한 최신 뉴스 요청을 생성합니다.
     /// - Parameters:
     ///   - keyword: 요청할 키워드.
@@ -37,7 +31,7 @@ final class News: NSManagedObject, NewsProtocol {
     ///   - offset: 요청 시작 지점.
     /// - Returns: 최신 뉴스 요청.
     @nonobjc class func fetchRequest(
-        for keyword: some KeywordProtocol,
+        for keyword: any KeywordProtocol,
         amount: Int? = nil,
         offset: Int = 0
     ) -> NSFetchRequest<News> {

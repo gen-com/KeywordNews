@@ -8,7 +8,7 @@
 import CoreData
 
 /// 디스크 저장을 관리하는 구현체입니다.
-struct PersistenceController: Persistable {
+final class PersistenceController: Persistable {
     let container: NSPersistentContainer
     
     // MARK: - Type Property
@@ -18,6 +18,8 @@ struct PersistenceController: Persistable {
     
     // MARK: - Initializer
     
+    /// 디스크 저장을 관리자를 생성합니다.
+    /// - Parameter inMemory: 메모리에 저장할 지 여부를 결정합니다.
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: PersistenceController.containerName)
         if inMemory, let persistentStoreDescription = container.persistentStoreDescriptions.first {

@@ -13,6 +13,8 @@ final class Keyword: NSManagedObject, KeywordProtocol {
     @NSManaged var value: String
     @NSManaged var order: Int
     
+    let isSaved = true
+    
     // MARK: - Type Property
     
     /// 엔티티 이름.

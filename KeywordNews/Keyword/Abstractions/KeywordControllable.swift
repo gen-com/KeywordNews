@@ -11,11 +11,11 @@ protocol KeywordControllable {
     var currentKeywords: [any KeywordProtocol] { get async }
     
     /// 키워드를 추가합니다. 중복은 허용하지 않습니다.
-    /// - Parameter value: 키워드 값.
-    func add(_ keyword: some KeywordProtocol) async throws
+    /// - Parameter keyword: 추가할 키워드.
+    func add(_ keyword: any KeywordProtocol) async throws
     /// 키워드를 삭제합니다.
-    /// - Parameter value: 삭제할 키워드.
-    func remove(_ keyword: some KeywordProtocol) async throws
+    /// - Parameter keyword: 삭제할 키워드.
+    func remove(_ keyword: any KeywordProtocol) async throws
     /// 키워드의 순서를 변경합니다.
     /// - Parameters:
     ///   - source: 원래 위치.
