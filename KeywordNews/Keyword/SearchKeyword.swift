@@ -5,10 +5,9 @@
 //  Created by Byeongjo Koo on 3/7/24.
 //
 
-/// 검색할 키워드 구현체입니다.
 struct SearchKeyword: KeywordProtocol {
     let value: String
-    var order: Int
+    let order: Int
     let isSaved: Bool
     
     // MARK: - Initializer

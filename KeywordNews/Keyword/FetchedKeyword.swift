@@ -5,7 +5,6 @@
 //  Created by Byeongjo Koo on 3/31/24.
 //
 
-/// 불러온 키워드 입니다.
 struct FetchedKeyword: KeywordProtocol {
     let value: String
     let order: Int
@@ -13,7 +12,7 @@ struct FetchedKeyword: KeywordProtocol {
     
     // MARK: - Initializer
     
-    init(_ keyword: any KeywordProtocol) {
+    init(_ keyword: KeywordProtocol) {
         value = keyword.value
         order = keyword.order
         isSaved = true

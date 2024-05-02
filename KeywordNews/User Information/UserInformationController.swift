@@ -5,71 +5,54 @@
 //  Created by Byeongjo Koo on 2/16/24.
 //
 
-import CoreData
-
-/// 사용자 정보를 관리하는 구현체입니다.
-struct UserInformationController: UserInformationControllable {
-    private var persistentController: Persistable
-    private let backgroundContext: NSManagedObjectContext
+struct UserInformationController {
+    private let persistenceController: Persistable
     
     // MARK: - Initializer
     
-    init(persistentController: Persistable) {
-        self.persistentController = persistentController
-        backgroundContext = persistentController.container.newBackgroundContext()
+    init(persistenceController: Persistable) {
+        self.persistenceController = persistenceController
+    }
+}
+
+// MARK: - UserInformationControllable conformance
+
+extension UserInformationController: UserInformationControllable {
+    var currentUserInformation: UserInformationProtocol? {
+        get async {
+            try? await persistenceController
+                .fetch(with: UserInformation.fetchRequest())
+                .map({ FetchedUserInformation($0) }).first
+        }
     }
     
-    // MARK: - UserInformationControllable conformance
-    
-    var currentUserInformation: any UserInformationProtocol {
-        get async throws {
-            try await backgroundContext.perform {
-                guard let userInformation = try? UserInformation.fetchRequest().execute().first
-                else { throw Error.failedToFetch }
-                return FetchedUserInformation(userInformation)
+    func createDefaultUserInformation() async throws {
+        let amount = 1
+        var index = 0
+        try await persistenceController.add(UserInformation.entityName, amount: amount) { managedObject in
+            if index < amount {
+                guard let userInformation = managedObject as? UserInformation else { return true }
+                userInformation.newsExpirationDays = Constant.defaultExpirationDays
+                index += 1
+                return false
             }
+            return true
         }
     }
     
     func setNewsExpirationDays(_ days: Int) async throws {
-        try await backgroundContext.perform {
-            if let userInformation = try? UserInformation.fetchRequest().execute().first {
-                userInformation.newsExpirationDays = days
-            } else {
-                do {
-                    let userInformation = try UserInformation(using: backgroundContext)
-                    userInformation.newsExpirationDays = days
-                } catch { throw Error.failedToCreate }
-            }
-            do { try backgroundContext.save() }
-            catch { throw Error.failedToSet }
-        }
+        try await persistenceController.update(
+            UserInformation.entityName,
+            forMatching: nil,
+            with: [#keyPath(UserInformation.newsExpirationDays): days]
+        )
     }
-    
-    // MARK: - Error
-    
-    /// 사용자 정보를 관리하는데 있어 발생할 수 있는 오류를 정의합니다.
-    enum Error: PresentableError {
-        /// 사용자 정보를 불러오지 못한 경우.
-        case failedToFetch
-        /// 키워드 정보를 생성하지 못한 경우.
-        case failedToCreate
-        /// 사용자 정보를 설정하지 못한 경우.
-        case failedToSet
-        
-        var title: String {
-            "사용자 정보 오류"
-        }
-        
-        var description: String {
-            switch self {
-            case .failedToFetch:
-                return "사용자 정보를 불러오는데 실패했습니다."
-            case .failedToCreate:
-                return "사용자 정보 생성에 실패했습니다."
-            case .failedToSet:
-                return "사용자 정보를 설정하는데 실패했습니다."
-            }
-        }
+}
+
+// MARK: - Constant
+
+extension UserInformationController {
+    private enum Constant {
+        static let defaultExpirationDays = 30
     }
 }

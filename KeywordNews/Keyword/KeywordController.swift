@@ -5,107 +5,72 @@
 //  Created by Byeongjo Koo on 3/2/24.
 //
 
-import CoreData
-
-/// 키워드를 관리하는 구현체입니다.
-struct KeywordController: KeywordControllable {
-    private var persistentController: Persistable
-    private let backgroundContext: NSManagedObjectContext
+struct KeywordController {
+    private let persistenceController: Persistable
     
     // MARK: - Initializer
     
-    init(persistentController: Persistable) {
-        self.persistentController = persistentController
-        backgroundContext = persistentController.container.newBackgroundContext()
+    init(persistenceController: Persistable) {
+        self.persistenceController = persistenceController
     }
+}
     
-    // MARK: - KeywordControllable conformance
-    
-    var currentKeywords: [any KeywordProtocol] {
+// MARK: - KeywordControllable conformance
+
+extension KeywordController: KeywordControllable {
+    var currentKeywords: [KeywordProtocol] {
         get async {
-            await backgroundContext.perform {
-                (try? Keyword.fetchRequest().execute().map { FetchedKeyword($0) }) ?? []
-            }
+            let fetchedKeywords = try? await persistenceController
+                .fetch(with: Keyword.fetchRequest())
+                .map({ FetchedKeyword($0) })
+            return fetchedKeywords ?? []
         }
     }
     
-    func add(_ keyword: any KeywordProtocol) async throws {
-        try await backgroundContext.perform {
-            guard let order = try? backgroundContext.count(for: Keyword.fetchRequest())
-            else { throw Error.failedToFetch }
-            guard let keywordToSave = try? Keyword(using: backgroundContext)
-            else { throw Error.failedToCreate }
-            keywordToSave.value = keyword.value
-            keywordToSave.order = order
-            do { try backgroundContext.save() }
-            catch { throw Error.failedToAdd }
-        }
-    }
-    
-    func remove(_ keyword: any KeywordProtocol) async throws {
-        try await backgroundContext.perform {
-            guard let storedKeywords = try? Keyword.fetchRequest(from: keyword.order).execute()
-            else { throw Error.failedToFetch }
-            for storedKeyword in storedKeywords {
-                if storedKeyword.value == keyword.value {
-                    backgroundContext.delete(storedKeyword)
-                } else {
-                    storedKeyword.order -= 1
-                }
+    func add(_ keyword: KeywordProtocol) async throws {
+        let order = await currentKeywords.count, amount = 1
+        var index = 0
+        try await persistenceController.add(Keyword.entityName, amount: amount) { managedObject in
+            if index < amount {
+                guard let keywordToStore = managedObject as? Keyword else { return true }
+                keywordToStore.value = keyword.value
+                keywordToStore.order = order
+                index += 1
+                return false
             }
-            do { try backgroundContext.save() }
-            catch { throw Error.failedToRemove }
+            return true
         }
     }
     
     func reorder(from source: Int, to destination: Int) async throws {
-        try await backgroundContext.perform {
-            let startIndex = min(source, destination), endIdnex = max(source, destination)
-            guard let storedKeywords = try? Keyword.fetchRequest(from: startIndex, to: endIdnex).execute()
-            else { throw Error.failedToFetch }
-            for keyword in storedKeywords {
-                if keyword.order == source {
-                    keyword.order = destination
-                } else {
-                    keyword.order += (source < destination ? -1 : 1)
-                }
+        let startIndex = min(source, destination), endIndex = max(source, destination)
+        let currentKeywords = await currentKeywords
+        for order in startIndex...endIndex {
+            var propertyToUpdate = [AnyHashable: Any]()
+            if order == source {
+                propertyToUpdate = [#keyPath(Keyword.order): destination]
+            } else {
+                propertyToUpdate = [#keyPath(Keyword.order): order + (source < destination ? -1 : 1)]
             }
-            do { try backgroundContext.save() }
-            catch { throw Error.failedToEdit }
+            try await persistenceController.update(
+                Keyword.entityName,
+                forMatching: Keyword.predicate(for: currentKeywords[order]),
+                with: propertyToUpdate
+            )
         }
     }
     
-    // MARK: - Error
-    
-    /// 키워드 정보를 관리하는데 있어 발생할 수 있는 오류를 정의합니다.
-    enum Error: PresentableError {
-        /// 필요한 키워드 정보를 불러오지 못한 경우.
-        case failedToFetch
-        /// 키워드 정보를 생성하지 못한 경우.
-        case failedToCreate
-        /// 키워드 정보를 추가하지 못한 경우.
-        case failedToAdd
-        /// 키워드 정보를 삭제하지 못한 경우.
-        case failedToRemove
-        /// 키워드 정보를 수정하지 못한 경우.
-        case failedToEdit
-        
-        var title: String {
-            "키워드 정보 오류"
-        }
-        
-        var description: String {
-            switch self {
-            case .failedToFetch:
-                return "필요한 키워드 정보를 불러오는데 실패했습니다."
-            case .failedToCreate:
-                return "키워드 정보 생성에 실패했습니다."
-            case .failedToAdd:
-                return "중복 혹은 다른 이유로 키워드 정보 추가에 실패했습니다."
-            case .failedToRemove:
-                return "키워드 정보 삭제에 실패했습니다."
-            case .failedToEdit:
-                return "키워드 정보 변경에 실패했습니다."
+    func remove(_ keyword: KeywordProtocol) async throws {
+        let currentKeywords = await currentKeywords
+        for order in keyword.order..<currentKeywords.count {
+            if order == keyword.order {
+                try await persistenceController.remove(with: Keyword.fetchRequest(for: keyword))
+            } else {
+                try await persistenceController.update(
+                    Keyword.entityName,
+                    forMatching: Keyword.predicate(for: currentKeywords[order]),
+                    with: [#keyPath(Keyword.order): order - 1]
+                )
             }
         }
     }

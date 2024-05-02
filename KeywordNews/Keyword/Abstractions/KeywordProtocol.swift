@@ -5,8 +5,7 @@
 //  Created by Byeongjo Koo on 2/11/24.
 //
 
-/// 키워드 정보 모델을 정의합니다.
-protocol KeywordProtocol: Hashable {
+protocol KeywordProtocol {
     /// 키워드 값.
     var value: String { get }
     /// 순서 값.
