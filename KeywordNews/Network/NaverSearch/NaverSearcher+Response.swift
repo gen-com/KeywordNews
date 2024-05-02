@@ -8,7 +8,6 @@
 import Foundation
 
 extension NaverSearcher {
-    /// 네이버 오픈 API의 응답에 대한 정보입니다.
     struct Response: ResponseProtocol {
         /// 요청을 통해 받은 응답을 입력으로 받습니다.
         private let input: Input
@@ -36,7 +35,6 @@ extension NaverSearcher {
     
     // MARK: - Response Status
     
-    /// 네이버 오픈 API가 지정한 상태입니다.
     enum Status: Int {
         /// 성공.
         case success = 200
@@ -70,7 +68,6 @@ extension NaverSearcher {
     
     // MARK: - Server error type
     
-    /// 서버에서 응답으로 내려주는 오류입니다.
     struct ResponseError: Decodable {
         /// 오류에 대한 정보.
         let message: String

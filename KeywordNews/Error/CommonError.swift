@@ -5,7 +5,6 @@
 //  Created by Byeongjo Koo on 11/27/23.
 //
 
-/// 일반적으로 발생할 수 있는 오류를 정의합니다.
 enum CommonError: PresentableError {
     /// 알 수 없는 오류.
     case unknown

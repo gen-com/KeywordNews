@@ -8,7 +8,6 @@
 import Foundation
 
 extension NaverSearcher {
-    /// 네이버 오픈 API에 대한 요청 정보입니다.
     struct Request: Requestable {
         private let url: URL
         private var httpHeader: [String: String]

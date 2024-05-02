@@ -5,7 +5,6 @@
 //  Created by Byeongjo Koo on 2023/08/17.
 //
 
-/// HTTT 메소드 정보를 정의합니다.
 enum HTTPMethod: String {
     /// GET(읽기) 요청 메소드.
     case get

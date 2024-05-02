@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 표현 가능한 오류 유형.
 protocol PresentableError: Error {
     /// 오류 제목.
     var title: String { get }

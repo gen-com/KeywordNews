@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 응답을 해석하는 유형을 정의합니다.
 protocol ResponseProtocol {
     /// 요청의 응답 타입.
     typealias Input = (data: Data, urlResponse: HTTPURLResponse)

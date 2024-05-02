@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 네이버 검색 구현체입니다.
 enum NaverSearcher: NaverSearchable {
     
     // MARK: - Searchable Conformance
@@ -27,7 +26,6 @@ enum NaverSearcher: NaverSearchable {
     
     // MARK: - Search result
     
-    /// 네이버 오픈 API의 뉴스 응답 데이터 모델입니다.
     struct SearchResult<Item>: SearchResultProtocol where Item: Codable {
         /// 요청 시각.
         var requestDate: String
@@ -51,7 +49,6 @@ enum NaverSearcher: NaverSearchable {
     
     // MARK: - Error
     
-    /// 네이버 검색에서 발생할 수 있는 오류를 정의합니다.
     enum Error: PresentableError {
         /// 잘못된 URL.
         case badURL

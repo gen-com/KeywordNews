@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 검색 결과 타입을 정의합니다.
 protocol SearchResultProtocol<Item>: Codable {
     /// 검색 항목 타입.
     associatedtype Item: Codable
@@ -23,6 +22,3 @@ protocol SearchResultProtocol<Item>: Codable {
     /// 요청한 항목.
     var items: [Item] { get }
 }
-
-/// 뉴스 검색 결과 별칭.
-typealias NewsSearchResult = any SearchResultProtocol<NaverSearcher.News>

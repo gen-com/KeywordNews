@@ -7,8 +7,10 @@
 
 import Foundation
 
+/// 뉴스 검색 결과 별칭.
+typealias NewsSearchResult = any SearchResultProtocol<NaverSearcher.News>
+
 extension NaverSearcher {
-    /// 뉴스 요청을 위한 파라미터 정보입니다.
     struct NewsParameter: Codable {
         /// 검색 키워드.
         let keyword: String
@@ -34,7 +36,6 @@ extension NaverSearcher {
         }
     }
     
-    /// 네이버 오픈 API가 제공하는 뉴스 정보입니다.
     struct News: NewsProtocol, Codable {
         /// 뉴스 제목.
         let title: String
@@ -62,7 +63,6 @@ extension NaverSearcher {
         }
     }
     
-    /// 정렬 방법.
     enum Sort: String, Codable {
         /// similarity, 유사성, 정확성.
         case sim

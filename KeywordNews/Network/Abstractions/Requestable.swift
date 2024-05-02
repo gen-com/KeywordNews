@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 요청 가능한 유형을 정의합니다.
 protocol Requestable {
     /// 요청 경로 타입.
     associatedtype Path

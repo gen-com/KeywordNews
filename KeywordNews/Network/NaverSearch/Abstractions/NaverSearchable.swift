@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 네이버 검색을 정의합니다.
 protocol NaverSearchable {
     /// 검색을 수행할 경로 타입.
     associatedtype Path
