@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 불러온 뉴스 입니다.
 struct FetchedNews: NewsProtocol {
     let title: String
     let content: String
@@ -15,9 +14,17 @@ struct FetchedNews: NewsProtocol {
     let order: Date
     var isArchived: Bool
     
-    // MARK: - Initializer
+    // MARK: - Initializers
     
-    init(_ news: any NewsProtocol) {
+    init(title: String, content: String, link: String, order: Date, isArchived: Bool) {
+        self.title = title
+        self.content = content
+        self.link = link
+        self.order = order
+        self.isArchived = isArchived
+    }
+    
+    init(_ news: NewsProtocol) {
         title = news.title
         content = news.content
         link = news.link

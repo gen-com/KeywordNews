@@ -7,67 +7,88 @@
 
 import Foundation
 
-/// 뉴스 정보 구현체입니다.
-struct NewsInformation: NewsInformationProtocol {
-    var keyword: any KeywordProtocol
-    var isFetching: Bool
+/// 뉴스를 항목으로 하는 정보 프로토콜의 별칭입니다.
+typealias NewsInformationProtocol = any SearchItemInformationProtocol<NewsProtocol>
+
+struct NewsInformation: SearchItemInformationProtocol {
+    var keyword: KeywordProtocol
+    var fetchState: FetchState
+    var items: [NewsProtocol]
+    var lastRequestDate: Date?
     var isSearchAvailable: Bool
     var didFetchAll: Bool
     var nextNewsSearchPosition: Int
-    var newsList: [any NewsProtocol]
+    var lastStoredNewsDate: Date?
+    let archiveFlag: Bool
     private var newsLinkSet: Set<String>
     
-    // MARK: - initializer
+    // MARK: - Initializer
     
-    init(keyword: any KeywordProtocol) {
+    init(keyword: KeywordProtocol, archiveFlag: Bool = false) {
         self.keyword = keyword
-        isFetching = false
+        fetchState = .idle
+        items = []
         isSearchAvailable = true
         didFetchAll = false
         nextNewsSearchPosition = 1
-        newsList = []
+        self.archiveFlag = archiveFlag
         newsLinkSet = []
     }
+}
+
+// MARK: - NewsInformationProtocol conformance
     
-    // MARK: - NewsInformationProtocol conformance
-    
-    mutating func updateKeyword(to keyword: any KeywordProtocol) {
+extension NewsInformation {
+    mutating func updateKeyowrd(to keyword: KeywordProtocol) {
         self.keyword = keyword
     }
     
-    mutating func setFetchingState(as value: Bool) {
-        isFetching = value
+    mutating func setFetchState(as state: FetchState) {
+        fetchState = state
+    }
+    
+    mutating func insert(listOfItem items: [NewsProtocol]) {
+        for news in items where !newsLinkSet.contains(news.link) {
+            newsLinkSet.insert(news.link)
+            self.items.append(news)
+        }
     }
     
     mutating func update(basedOn newsFetchResult: NewsFetchResultProtocol) {
-        insert(listOfNews: newsFetchResult.newsList)
-        isSearchAvailable = newsList.count < newsFetchResult.searchLimit && !newsFetchResult.doesOverlapSavedNews
-        nextNewsSearchPosition = newsFetchResult.searchPosition + newsFetchResult.newsList.count
+        lastRequestDate = newsFetchResult.requestDate
+        insert(listOfItem: newsFetchResult.items)
+        isSearchAvailable = items.count < newsFetchResult.searchLimit && !newsFetchResult.doesOverlapSavedItems
+        nextNewsSearchPosition = newsFetchResult.searchPosition + newsFetchResult.items.count
         didFetchAll = keyword.isSaved
-        ? newsFetchResult.newsList.isEmpty : newsFetchResult.searchLimit <= nextNewsSearchPosition
+        ? newsFetchResult.items.isEmpty 
+        : newsFetchResult.searchLimit <= nextNewsSearchPosition
     }
     
     mutating func refresh() {
         nextNewsSearchPosition = 1
         isSearchAvailable = true
         didFetchAll = false
-        removeAllNews()
+        lastStoredNewsDate = items.first?.order
+        items.removeAll()
     }
     
-    mutating func insert(listOfNews newsList: [any NewsProtocol]) {
-        for news in newsList where !newsLinkSet.contains(news.link) {
-            newsLinkSet.insert(news.link)
-            self.newsList.append(news)
+    mutating func setArchiveState(of news: NewsProtocol, as state: Bool) throws {
+        guard let targetIndex = items.firstIndex(where: { $0.link == news.link })
+        else { throw CommonError.valueNotFound }
+        let targetNews = items.remove(at: targetIndex)
+        if archiveFlag == false {
+            let updatedNews = FetchedNews(
+                title: targetNews.title,
+                content: targetNews.content,
+                link: targetNews.link,
+                order: targetNews.order,
+                isArchived: state
+            )
+            items.insert(updatedNews, at: targetIndex)
         }
     }
     
-    mutating func removeAllNews() {
-        newsList.removeAll()
-    }
-    
-    mutating func changeArchiveState(of news: any NewsProtocol) throws {
-        guard let targetIndex = newsList.firstIndex(where: { $0.link == news.link })
-        else { throw CommonError.valueNotFound }
-        newsList[targetIndex].isArchived.toggle()
+    mutating func setLastStoredNewsDate(as date: Date) {
+        lastStoredNewsDate = date
     }
 }

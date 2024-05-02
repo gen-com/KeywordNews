@@ -7,25 +7,47 @@
 
 import Foundation
 
-struct NewsFetchResult: NewsFetchResultProtocol {
+/// 뉴스를 항목으로 하는 가져오기 결과 프로토콜의 별칭입니다.
+typealias NewsFetchResultProtocol = any FetchResultProtocol<NewsProtocol>
+
+struct NewsFetchResult: FetchResultProtocol {
+    var requestDate: Date?
     var searchLimit: Int
     var searchPosition: Int
-    var doesOverlapSavedNews: Bool
-    var newsList: [any NewsProtocol]
+    var doesOverlapSavedItems: Bool
+    var items: [NewsProtocol]
+    
+    // MARK: - Initializer
     
     init() {
         searchLimit = Constant.defaultSearchLimit
-        searchPosition = Constant.defaultSearchLimit
-        doesOverlapSavedNews = false
-        newsList = []
+        searchPosition = 1
+        doesOverlapSavedItems = false
+        items = []
+    }
+}
+
+// MARK: - NewsFetchResultProtocol conformance
+
+extension NewsFetchResult {
+    mutating func update(referringTo searchResult: any SearchResultProtocol) {
+        requestDate = try? searchResult.requestDate.toDate(format: .naver)
+        searchLimit = min(searchResult.totalItemAmount, Constant.defaultSearchLimit)
+        searchPosition = searchResult.startIndex
     }
     
-    mutating func setSearchLimit(_ amount: Int) {
-        searchLimit = min(amount, Constant.defaultSearchLimit)
+    mutating func setDoesOverlapSavedItems(as value: Bool) {
+        doesOverlapSavedItems = value
     }
     
-    // MARK: - Constants
-    
+    mutating func append(contentsOf items: [NewsProtocol]) {
+        self.items.append(contentsOf: items)
+    }
+}
+
+// MARK: - Constants
+
+extension NewsFetchResult {
     private enum Constant {
         static let defaultSearchLimit = 100
     }
